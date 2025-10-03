@@ -10,5 +10,4 @@ repos:
     hooks:
       - id: check-github-workflows
       - id: check-dependabot
-      # Schema is not compatible with a composite action
-      # - id: check-github-actions
+      - id: check-github-actions
