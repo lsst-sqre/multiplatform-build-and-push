@@ -15,8 +15,10 @@ name: CI
       - "*"
 
 jobs:
-  build:
+  setup:
     runs-on: ubuntu-latest
+	output:
+      images: ${{ steps.image_names.output.images }}
 
     # (optional) only build on tags or ticket branches
     if: >
@@ -36,14 +38,22 @@ jobs:
           ghcr_repo="ghcr.io/${repo}"
           images="${ghcr_repo},${gar_repo}"
           echo "images=${images}" >> ${GITHUB_OUTPUT}
+  build:
+    needs: setup
+    uses: lsst-sqre/multiplatform-build-and-push/.github/workflows/build.yaml@v1
+    with:
+      images: ${{ steps.image_names.outputs.images }}
 
-      - uses: lsst-sqre/multiplatform-build-and-push@v1
-        id: build
-        with:
-          images: ${{ steps.image_names.outputs.images }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: echo Pushed ${{ steps.image_names.outputs.images }}
+  report:
+    needs: build
+	runs-on: ubuntu-latest
+	env:
+	  built: ${{ needs.build.outputs.images }}
+    steps:
+    - name: report
+      shell: bash
+      run: |
+        echo "Built images: ${built}"
 ```
 
 By default, ghcr.io packages are named after the GitHub repository.
@@ -55,8 +65,6 @@ To automatically set that, the above example uses the context variable `${{ gith
 
 - `image` (string, required) the name of the image to build and push. The image does not include the registry (`ghcr.io/`) or the tag.
   For example, the image input for `ghcr.io/owner/repo:tag` image is `owner/repo`.
-
-- `github_token` (string, required) the GitHub token to use for pushing to ghcr.io. Default is `${{ secrets.GITHUB_TOKEN }}`.
 
 - `dockerfile` (string, optional) the path to the Dockerfile to build. Default is `Dockerfile`.
 
@@ -71,20 +79,16 @@ To automatically set that, the above example uses the context variable `${{ gith
 
 - `build-args` (list, optional) A list of build-arguments as newline-delimited `arg=value` string pairs. These may be specified in the Dockerfile as `ARG` statements.
 
-- `additional-tags` (list, optional) A newline-delimited list of additional tags to be added to the built image. These can be string literals or can conform to the `docker/metadata-action` [tags grammar](https://github.com/docker/metadata-action?tab=readme-ov-file#tags-input).
+- `additional-tags` (list, optional) A comma-delimited list of additional tags to be added to the built image. These must be string literals.
 
 ### Outputs
 
-- `fully_qualified_image_digest` (string) A complete, unique, and immutable identifier for the built image,
-  e.g. `ghcr.io/owner/repo@sha256:4dcaf15076e027f272dc8aba14b1bab77fec44f8aac94c94f1b01ceee8d099d4`.
-  This string may be used to reference the built image in `docker pull`, `docker run`, etc.
-- `tag` (string) the tag of the image that was pushed to ghcr.io.
+- `images` (string) A comma-delimited list of images that were built/pushed.
 
 ## Developer guide
 
-This repository provides a **composite** GitHub Action, a type of action that packages multiple regular actions into a single step.
-We do this to make the GitHub Actions of all our software projects more consistent and easier to maintain.
-[You can learn more about composite actions in the GitHub documentation.](https://docs.github.com/en/actions/creating-actions/creating-a-composite-action)
+This repository provides a GitHub Action reusable workflow.
+[You can learn more about reusable workflows in the GitHub documentation.](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows)
 
 Create new releases using the GitHub Releases UI and assign a tag with a [semantic version](https://semver.org), including a `v` prefix. Choose the semantic version based on compatibility for users of this workflow. If backwards compatibility is broken, bump the major version.
 
