@@ -17,7 +17,7 @@ name: CI
 jobs:
   setup:
     runs-on: ubuntu-latest
-	output:
+    output:
       images: ${{ steps.image_names.output.images }}
 
     # (optional) only build on tags or ticket branches
@@ -46,9 +46,9 @@ jobs:
 
   report:
     needs: build
-	runs-on: ubuntu-latest
-	env:
-	  built: ${{ needs.build.outputs.images }}
+    runs-on: ubuntu-latest
+    env:
+      built: ${{ needs.build.outputs.images }}
     steps:
     - name: report
       shell: bash
