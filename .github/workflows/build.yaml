@@ -39,6 +39,7 @@ on:
       images:
         description: "Images that were created, comma-separated string."
         value: ${{ jobs.unify_manifest.outputs.images }}
+    secrets: inherit
 
 # We need actions/write if we want to do a GH App, and we need
 # packages/write to push to ghcr.io with GITHUB_TOKEN
