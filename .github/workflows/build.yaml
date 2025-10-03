@@ -36,9 +36,9 @@ on:
         required: false
         type: string
     outputs:
-      images:
+      manifest_images:
         description: "Images that were created, comma-separated string."
-        value: ${{ jobs.unify_manifest.outputs.images }}
+        value: ${{ jobs.unify_manifest.outputs.manifest_images }}
     secrets:
       DOCKER_USERNAME:
         required: false
@@ -61,8 +61,11 @@ permissions:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    env:
+      images: ${{ inputs.images }}
     outputs:
-      tag: steps.tag.outputs.tag
+      tag: ${{ steps.tag.outputs.tag }}
+      img: ${{ steps.tag.outputs.img }}
     steps:
       - name: checkout_setup
         uses: actions/checkout@v4
@@ -77,6 +80,7 @@ jobs:
           . ${GITHUB_WORKSPACE}/action-shell/functions.sh
           tag=$( docker_tag )
           echo "tag=${tag}" >> ${GITHUB_OUTPUT}
+          echo "img=${images}" >> ${GITHUB_OUTPUT}
 
   build_containers:
     needs: setup
@@ -84,9 +88,9 @@ jobs:
     timeout-minutes: 60
     env:
       tag: ${{ needs.setup.outputs.tag }}
-      images: ${{ github.event.inputs.images }}
+      images: ${{ needs.setup.outputs.img }}
       platform: ${{ matrix.platform.arch }}
-      additional_tags: ${{ github.event.inputs.additional-tags }}
+      additional_tags: ${{ inputs.additional-tags }}
 
     strategy:
       matrix:
@@ -98,20 +102,22 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+
+      - name: checkout_functions
+        uses: actions/checkout@v4
         with:
           path: 'action-shell'
           repository: lsst-sqre/multiplatform-build-and-push
 
-      - name: setup_buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          name: sciplat-lab-${{ matrix.platform.arch }}
-          platforms: linux/${{ matrix.platform.arch }}
+      - name: dump_env
+        shell: bash
+        run: |
+          env | sort
 
       - name: login
         uses: lsst-sqre/multi-repository-login@v1
         with:
-          images: ${{ github.event.inputs.images }}
+          images: ${{ env.images }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
           GAR_PUSH_TOKEN: ${{ secrets.GAR_PUSH_TOKEN }}
@@ -125,14 +131,20 @@ jobs:
           tags=$( calculate_tags )
           echo "tags=${tags}" >> ${GITHUB_OUTPUT}
 
+      - name: setup_buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          name: sciplat-lab-${{ matrix.platform.arch }}
+          platforms: linux/${{ matrix.platform.arch }}
+
       - name: build_platform_container
         uses: docker/build-push-action@v6
         with:
-          context: ${{ github.event.inputs.context }}
-          file: ${{ github.event.inputs.dockerfile }}
-          push: ${{ github.event.inputs.push }}
-          target: ${{ github.event.inputs.target }}
-          build-args: ${{ github.event.inputs.build-args }}
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
+          push: ${{ inputs.push }}
+          target: ${{ inputs.target }}
+          build-args: ${{ inputs.build-args }}
           builder: sciplat-lab-${{ matrix.platform.arch }}
           platforms: linux/${{ matrix.platform.arch }}
           tags: ${{ steps.calculate_tags.outputs.tags }}
@@ -144,10 +156,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       tag: ${{ needs.setup.outputs.tag }}
-      images: ${{ github.event.inputs.images }}
-      additional_tags: ${{ github.event.inputs.additional-tags }}
+      images: ${{ needs.setup.outputs.img }}
+      additional_tags: ${{ inputs.additional-tags }}
     outputs:
-      images: ${{ steps.make_manifest.outputs.images }}
+      manifest_images: ${{ steps.make_manifest.outputs.images }}
 
     timeout-minutes: 30
     steps:
@@ -161,7 +173,11 @@ jobs:
         uses: lsst-sqre/multi-repository-login@v1
         # Needs v1 when there is one
         with:
-          images: ${{ github.event.inputs.images }}
+          images: ${{ env.images }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+          GAR_PUSH_TOKEN: ${{ secrets.GAR_PUSH_TOKEN }}
+          GHCR_PUSH_TOKEN: ${{ secrets.GHCR_PUSH_TOKEN }}
 
       - name: make_total_tagset
         id: make_total_tagset
@@ -180,4 +196,4 @@ jobs:
         with:
           inputs: ${{ steps.make_total_tagset.outputs.in_tags }}
           tags: ${{ steps.make_total_tagset.outputs.out_tags }}
-          push: ${{ github.event.inputs.push }}
+          push: ${{ inputs.push }}
