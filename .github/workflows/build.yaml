@@ -31,6 +31,10 @@ on:
         description: "List of build-time variables."
         required: false
         type: string
+      target:
+        description: "Name of target stage to build."
+        required: false
+        type: string
     outputs:
       images:
         description: "Images that were created, comma-separated string."
@@ -114,6 +118,7 @@ jobs:
           context: ${{ github.event.inputs.context }}
           file: ${{ github.event.inputs.dockerfile }}
           push: ${{ github.event.inputs.push }}
+          target: ${{ github.event.inputs.target }}
           build-args: ${{ github.event.inputs.build-args }}
           builder: sciplat-lab-${{ matrix.platform.arch }}
           platforms: linux/${{ matrix.platform.arch }}
