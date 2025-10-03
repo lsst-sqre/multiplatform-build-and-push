@@ -1,0 +1,156 @@
+name: Multiplatform build-and-push
+
+on:
+  workflow_call:
+    inputs:
+      images:
+        description: "Fully-qualified URIs for output Docker images, comma-separated string."
+        required: true
+        type: string
+      dockerfile:
+        description: "The name of the Dockerfile to build."
+        required: false
+        default: "Dockerfile"
+        type: string
+      context:
+        description: "The build context to use."
+        required: false
+        default: "."
+        type: string
+      push:
+        description: "Whether to push the images."
+        required: false
+        default: true
+        type: boolean
+      additional-tags:
+        description: "Additional tags to add to built image, comma-separated string."
+        required: false
+        default: ""
+        type: string
+      build-args:
+        description: "List of build-time variables."
+        required: false
+        type: string
+    outputs:
+      images:
+        description: "Images that were created, comma-separated string."
+        value: ${{ jobs.unify_manifest.outputs.images }}
+
+# We need actions/write if we want to do a GH App, and we need
+# packages/write to push to ghcr.io with GITHUB_TOKEN
+permissions:
+  actions: write
+  contents: read
+  packages: write
+  statuses: read
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: steps.tag.outputs.tag
+    steps:
+      - name: checkout_setup
+        uses: actions/checkout@v4
+
+      - name: Define the tag
+        id: tag
+        shell: bash
+        run: |
+          . ${{ github.action_path }}/functions.sh
+          tag=$( docker_tag )
+          echo "tag=${tag}" >> ${GITHUB_OUTPUT}
+
+  build_containers:
+    needs: setup
+    runs-on: ${{ matrix.platform.runs_on }}
+    timeout-minutes: 60
+    env:
+      tag: ${{ needs.setup.outputs.tag }}
+      images: ${{ github.event.inputs.images }}
+      platform: ${{ matrix.platform.arch }}
+      additional_tags: ${{ github.event.inputs.additional-tags }}
+
+    strategy:
+      matrix:
+        platform:
+          - arch: "amd64"
+            runs_on: "ubuntu-latest"
+          - arch: "arm64"
+            runs_on: "ubuntu-24.04-arm"
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup_buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          name: sciplat-lab-${{ matrix.platform.arch }}
+          platforms: linux/${{ matrix.platform.arch }}
+
+      - name: login
+        uses: lsst-sqre/multi-repository-login
+        # Needs v1 when there is one
+        with:
+          images: ${{ github.event.inputs.images }}
+
+      - name: calculate_tags
+        id: calculate_tags
+        shell: bash
+        run: |
+          . ${{ github.action_path }}/functions.sh
+          tags=$( calculate_tags )
+          echo "tags=${tags}" >> ${GITHUB_OUTPUT}
+
+      - name: build_platform_container
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ github.event.inputs.context }}
+          file: ${{ github.event.inputs.dockerfile }}
+          push: ${{ github.event.inputs.push }}
+          build-args: ${{ github.event.inputs.build-args }}
+          builder: sciplat-lab-${{ matrix.platform.arch }}
+          platforms: linux/${{ matrix.platform.arch }}
+          tags: ${{ steps.calculate_tags.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  unify_manifest:
+    needs: build_containers
+    runs-on: ubuntu-latest
+    env:
+      tag: ${{ needs.setup.outputs.tag }}
+      images: ${{ github.event.inputs.images }}
+      additional_tags: ${{ github.event.inputs.additional-tags }}
+    outputs:
+      images: ${{ steps.make_manifest.outputs.images }}
+
+    timeout-minutes: 30
+    steps:
+      - name: checkout_unify_manifest
+        uses: actions/checkout@v4
+
+      - name: login
+        uses: lsst-sqre/multi-repository-login
+        # Needs v1 when there is one
+        with:
+          images: ${{ github.event.inputs.images }}
+
+      - name: make_total_tagset
+        id: make_total_tagset
+        shell: bash
+        run: |
+          . scripts/helper-functions.sh
+          t1=$( platform=amd64 calculate_tags )
+          t2=$( platform=arm64 calculate_tags )
+          in_tags="${t1},${t2}"
+          out_tags=$(echo ${t1} | sed -e 's/-amd64,/,/g' -e 's/-amd64$//g' )
+          echo "in_tags=${in_tags}" >> ${GITHUB_OUTPUT}
+          echo "out_tags=${out_tags}" >> ${GITHUB_OUTPUT}
+
+      - name: make_manifest
+        uses: Noelware/docker-manifest-action@v1
+        with:
+          inputs: ${{ steps.make_total_tagset.outputs.in_tags }}
+          tags: ${{ steps.make_total_tagset.outputs.out_tags }}
+          push: ${{ github.event.inputs.push }}
