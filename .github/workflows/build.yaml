@@ -89,7 +89,7 @@ jobs:
           platforms: linux/${{ matrix.platform.arch }}
 
       - name: login
-        uses: lsst-sqre/multi-repository-login
+        uses: lsst-sqre/multi-repository-login@v1
         # Needs v1 when there is one
         with:
           images: ${{ github.event.inputs.images }}
@@ -131,7 +131,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: login
-        uses: lsst-sqre/multi-repository-login
+        uses: lsst-sqre/multi-repository-login@v1
         # Needs v1 when there is one
         with:
           images: ${{ github.event.inputs.images }}
