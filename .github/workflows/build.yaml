@@ -39,7 +39,16 @@ on:
       images:
         description: "Images that were created, comma-separated string."
         value: ${{ jobs.unify_manifest.outputs.images }}
-    secrets: inherit
+    secrets:
+      DOCKER_USERNAME:
+        required: false
+      DOCKER_TOKEN:
+        required: false
+      GHCR_PUSH_TOKEN:
+        required: false
+      GAR_PUSH_TOKEN:
+        required: false
+
 
 # We need actions/write if we want to do a GH App, and we need
 # packages/write to push to ghcr.io with GITHUB_TOKEN
@@ -101,9 +110,12 @@ jobs:
 
       - name: login
         uses: lsst-sqre/multi-repository-login@v1
-        # Needs v1 when there is one
         with:
           images: ${{ github.event.inputs.images }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+          GAR_PUSH_TOKEN: ${{ secrets.GAR_PUSH_TOKEN }}
+          GHCR_PUSH_TOKEN: ${{ secrets.GHCR_PUSH_TOKEN }}
 
       - name: calculate_tags
         id: calculate_tags
