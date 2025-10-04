@@ -152,7 +152,7 @@ jobs:
       images: ${{ inputs.images }}
       additional_tags: ${{ inputs.additional-tags }}
     outputs:
-      images: ${{ steps.make_total_tagset.out_tags }}
+      images: ${{ steps.make_manifest.outputs.images }}
 
     timeout-minutes: 30
     steps:
