@@ -57,14 +57,16 @@ To automatically set that, the above example uses the context variable `${{ gith
   Each image includes the registry (e.g. `ghcr.io`) but not the tag.
   For example, you might have `ghcr.io/lsst-sqre/nublado-jupyterlab-base,docker.io/lsstsqre/jupyterlab-base`.
 
+- `tag` (string, optional) the tag to add to the image. If unspecified, a tag will be calculated from the git branch of tag.
+
 - `dockerfile` (string, optional) the path to the Dockerfile to build. Default is `Dockerfile`.
 
 - `context` (string, optional) the [Docker build context](https://docs.docker.com/build/building/context/). Default is `.`.
 
-- `push` (boolean, optional) a flag to enable pushing to ghcr.io. Default is `true`.
-  If `false`, the action skips the push to ghcr.io, but still builds the image with [`docker build`](https://docs.docker.com/engine/reference/commandline/build/).
+- `cache` (boolean, optional) a flag to enable GitHub Actions caching. Default is `true`. If the image being built is very large, `false` might be preferable.
 
-- `platforms` (list, optional) List of target platform for build.
+- `push` (boolean, optional) a flag to enable pushing to artifact registries (based on the `image` input) . Default is `true`.
+  If `false`, the action skips the image push, but still builds the image with [`docker build`](https://docs.docker.com/engine/reference/commandline/build/) and still does the manifest reassembly across platforms.
 
 - `target` (string, optional) the name of a build stage in the Dockerfile to target for the image. This allows multiple images built from a single Dockerfile, e.g., "runtime-A" and "runtime-B".
 
