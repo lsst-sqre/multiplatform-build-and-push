@@ -65,7 +65,6 @@ jobs:
       images: ${{ inputs.images }}
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
-      img: ${{ steps.tag.outputs.img }}
     steps:
       - name: checkout_setup
         uses: actions/checkout@v4
@@ -80,7 +79,6 @@ jobs:
           . ${GITHUB_WORKSPACE}/action-shell/functions.sh
           tag=$( docker_tag )
           echo "tag=${tag}" >> ${GITHUB_OUTPUT}
-          echo "img=${images}" >> ${GITHUB_OUTPUT}
 
   build_containers:
     needs: setup
@@ -88,7 +86,7 @@ jobs:
     timeout-minutes: 60
     env:
       tag: ${{ needs.setup.outputs.tag }}
-      images: ${{ needs.setup.outputs.img }}
+      images: ${{ inputs.images }}
       platform: ${{ matrix.platform.arch }}
       additional_tags: ${{ inputs.additional-tags }}
 
@@ -108,11 +106,6 @@ jobs:
         with:
           path: 'action-shell'
           repository: lsst-sqre/multiplatform-build-and-push
-
-      - name: dump_env
-        shell: bash
-        run: |
-          env | sort
 
       - name: login
         uses: lsst-sqre/multi-repository-login@v1
@@ -152,11 +145,11 @@ jobs:
           cache-to: type=gha,mode=max
 
   unify_manifest:
-    needs: build_containers
+    needs: [setup, build_containers]
     runs-on: ubuntu-latest
     env:
       tag: ${{ needs.setup.outputs.tag }}
-      images: ${{ needs.setup.outputs.img }}
+      images: ${{ inputs.images }}
       additional_tags: ${{ inputs.additional-tags }}
     outputs:
       manifest_images: ${{ steps.make_manifest.outputs.images }}
