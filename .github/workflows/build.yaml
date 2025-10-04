@@ -146,13 +146,13 @@ jobs:
         env:
           cache: ${{ inputs.cache }}
         run:
-          cache_from=""
+          cache_from="";
           cache_to="";
           if [ "${cache}" != "false" ]; then
-              cache_from="type=gha"
+              cache_from="type=gha";
               cache_to="type=gha,mode=max";
           fi;
-          echo "cache_from=${cache_from}" >> ${GITHUB_OUTPUT}
+          echo "cache_from=${cache_from}" >> ${GITHUB_OUTPUT} ;
           echo "cache_to=${cache_to}" >> ${GITHUB_OUTPUT}
 
       - name: build_platform_container
@@ -166,8 +166,8 @@ jobs:
           builder: sciplat-lab-${{ matrix.platform.arch }}
           platforms: linux/${{ matrix.platform.arch }}
           tags: ${{ steps.calculate_tags.outputs.tags }}
-          cache-from: ${{ steps.calculate_cache.outputs.cache_from }}
-          cache-to: ${{ steps.calculate_cache.outputs.cache_to }}
+          cache-from: ${{ steps.calculate_cache_params.outputs.cache_from }}
+          cache-to: ${{ steps.calculate_cache_params.outputs.cache_to }}
 
   unify_manifest:
     needs: [setup, build_containers]
