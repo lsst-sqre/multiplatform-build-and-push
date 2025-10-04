@@ -43,17 +43,6 @@ jobs:
     uses: lsst-sqre/multiplatform-build-and-push/.github/workflows/build.yaml@v1
     with:
       images: ${{ steps.image_names.outputs.images }}
-
-  report:
-    needs: build
-    runs-on: ubuntu-latest
-    env:
-      built: ${{ needs.build.outputs.images }}
-    steps:
-    - name: report
-      shell: bash
-      run: |
-        echo "Built images: ${built}"
 ```
 
 By default, ghcr.io packages are named after the GitHub repository.
@@ -82,10 +71,6 @@ To automatically set that, the above example uses the context variable `${{ gith
 - `build-args` (list, optional) A list of build-arguments as newline-delimited `arg=value` string pairs. These may be specified in the Dockerfile as `ARG` statements.
 
 - `additional-tags` (list, optional) A comma-delimited list of additional tags to be added to the built image. These must be string literals.
-
-### Outputs
-
-- `images` (string) A comma-delimited list of images that were built/pushed with a unified manifest.
 
 ## Developer guide
 

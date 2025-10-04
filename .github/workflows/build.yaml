@@ -35,10 +35,6 @@ on:
         description: "Name of target stage to build."
         required: false
         type: string
-    outputs:
-      images:
-        description: "Images that were created, comma-separated string."
-        value: ${{ jobs.unify_manifest.outputs.images }}
     secrets:
       DOCKER_USERNAME:
         required: false
@@ -151,8 +147,6 @@ jobs:
       tag: ${{ needs.setup.outputs.tag }}
       images: ${{ inputs.images }}
       additional_tags: ${{ inputs.additional-tags }}
-    outputs:
-      images: ${{ steps.make_manifest.outputs.images }}
 
     timeout-minutes: 30
     steps:
