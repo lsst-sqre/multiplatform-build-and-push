@@ -63,8 +63,10 @@ To automatically set that, the above example uses the context variable `${{ gith
 
 ### Inputs
 
-- `image` (string, required) the name of the image to build and push. The image does not include the registry (`ghcr.io/`) or the tag.
-  For example, the image input for `ghcr.io/owner/repo:tag` image is `owner/repo`.
+- `image` (string, required) the name of the image to build and push
+  The image may be a comma-separated list.
+  Each image includes the registry (e.g. `ghcr.io`) but not the tag.
+  For example, you might have `ghcr.io/lsst-sqre/nublado-jupyterlab-base,docker.io/lsstsqre/jupyterlab-base`.
 
 - `dockerfile` (string, optional) the path to the Dockerfile to build. Default is `Dockerfile`.
 
