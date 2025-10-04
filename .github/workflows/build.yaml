@@ -36,9 +36,9 @@ on:
         required: false
         type: string
     outputs:
-      manifest_images:
+      images:
         description: "Images that were created, comma-separated string."
-        value: ${{ jobs.unify_manifest.outputs.manifest_images }}
+        value: ${{ jobs.unify_manifest.outputs.images }}
     secrets:
       DOCKER_USERNAME:
         required: false
@@ -152,7 +152,7 @@ jobs:
       images: ${{ inputs.images }}
       additional_tags: ${{ inputs.additional-tags }}
     outputs:
-      manifest_images: ${{ steps.make_manifest.outputs.images }}
+      images: ${{ steps.make_total_tagset.out_tags }}
 
     timeout-minutes: 30
     steps:

@@ -85,7 +85,7 @@ To automatically set that, the above example uses the context variable `${{ gith
 
 ### Outputs
 
-- `manifest_images` (string) A comma-delimited list of images that were built/pushed with a unified manifest.
+- `images` (string) A comma-delimited list of images that were built/pushed with a unified manifest.
 
 ## Developer guide
 
