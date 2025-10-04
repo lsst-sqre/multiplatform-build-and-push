@@ -7,6 +7,10 @@ on:
         description: "Fully-qualified URIs for output Docker images, comma-separated string."
         required: true
         type: string
+      tag:
+        description: "Tag for image (optional). If not set, tag will be derived from the git branch."
+        required: false
+        type: string
       dockerfile:
         description: "The name of the Dockerfile to build."
         required: false
@@ -17,6 +21,11 @@ on:
         required: false
         default: "."
         type: string
+      cache:
+        description: "Whether to use GitHub cache for images.  If they are very large, you might not want to."
+        required: false
+        default: true
+        type: boolean
       push:
         description: "Whether to push the images."
         required: false
@@ -71,9 +80,14 @@ jobs:
       - name: Define the tag
         id: tag
         shell: bash
+        env:
+          tag: ${{ inputs.tag }}
         run: |
-          . ${GITHUB_WORKSPACE}/action-shell/functions.sh
-          tag=$( docker_tag )
+          # Use existing tag if we have one; otherwise, get one from git.
+          if [ -z "${tag}" ]; then
+              . ${GITHUB_WORKSPACE}/action-shell/functions.sh
+              tag=$( docker_tag )
+          fi
           echo "tag=${tag}" >> ${GITHUB_OUTPUT}
 
   build_containers:
@@ -126,6 +140,21 @@ jobs:
           name: sciplat-lab-${{ matrix.platform.arch }}
           platforms: linux/${{ matrix.platform.arch }}
 
+      - name: calculate_cache_params
+        id: calculate_cache_params
+        shell: bash
+        env:
+          cache: ${{ inputs.cache }}
+        run:
+          cache_from=""
+          cache_to="";
+          if [ "${cache}" != "false" ]; then
+              cache_from="type=gha"
+              cache_to="type=gha,mode=max";
+          fi;
+          echo "cache_from=${cache_from}" >> ${GITHUB_OUTPUT}
+          echo "cache_to=${cache_to}" >> ${GITHUB_OUTPUT}
+
       - name: build_platform_container
         uses: docker/build-push-action@v6
         with:
@@ -137,8 +166,8 @@ jobs:
           builder: sciplat-lab-${{ matrix.platform.arch }}
           platforms: linux/${{ matrix.platform.arch }}
           tags: ${{ steps.calculate_tags.outputs.tags }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: ${{ steps.calculate_cache.outputs.cache_from }}
+          cache-to: ${{ steps.calculate_cache.outputs.cache_to }}
 
   unify_manifest:
     needs: [setup, build_containers]
