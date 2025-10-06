@@ -44,6 +44,11 @@ on:
         description: "Name of target stage to build."
         required: false
         type: string
+      use-nonstandard-ghcr-token:
+        description: "Accomodation for sciplat-lab: if set, use GHCR_PUSH_TOKEN rather than GITHUB_TOKEN"
+        required: false
+        type: boolean
+        default: false
     secrets:
       DOCKER_USERNAME:
         required: false
@@ -52,6 +57,8 @@ on:
       GHCR_PUSH_TOKEN:
         required: false
       GAR_PUSH_TOKEN:
+        required: false
+      GITHUB_TOKEN:
         required: false
 
 
@@ -121,10 +128,12 @@ jobs:
         uses: lsst-sqre/multi-repository-login@v1
         with:
           images: ${{ env.images }}
+          use_nonstandard_ghcr_token: ${{ inputs.use-nonstandard-ghcr-token }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
           GAR_PUSH_TOKEN: ${{ secrets.GAR_PUSH_TOKEN }}
           GHCR_PUSH_TOKEN: ${{ secrets.GHCR_PUSH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: calculate_tags
         id: calculate_tags
