@@ -17,8 +17,8 @@ name: CI
 jobs:
   setup:
     runs-on: ubuntu-latest
-    output:
-      images: ${{ steps.image_names.output.images }}
+    outputs:
+      images: ${{ steps.image_names.outputs.images }}
 
     # (optional) only build on tags or ticket branches
     if: >
@@ -42,7 +42,7 @@ jobs:
     needs: setup
     uses: lsst-sqre/multiplatform-build-and-push/.github/workflows/build.yaml@v1
     with:
-      images: ${{ steps.image_names.outputs.images }}
+      images: ${{ needs.setup.outputs.images }}
 ```
 
 By default, ghcr.io packages are named after the GitHub repository.
@@ -70,9 +70,13 @@ To automatically set that, the above example uses the context variable `${{ gith
 
 - `target` (string, optional) the name of a build stage in the Dockerfile to target for the image. This allows multiple images built from a single Dockerfile, e.g., "runtime-A" and "runtime-B".
 
-- `build-args` (list, optional) A list of build-arguments as newline-delimited `arg=value` string pairs. These may be specified in the Dockerfile as `ARG` statements.
+- `build-args` (list, optional) A list of build arguments as newline-delimited `arg=value` string pairs. These may be specified in the Dockerfile as `ARG` statements.
 
 - `additional-tags` (list, optional) A comma-delimited list of additional tags to be added to the built image. These must be string literals.
+
+- `use-nonstandard-ghcr-token` (boolean, optional, defaults to `false`) for reasons unknown, `GITHUB_TOKEN` has proven insufficient to push sciplat-lab images.
+  This allows the user to specify instead that `GHCR_PUSH_TOKEN` may be substituted.
+  This parameter should not generally be required.
 
 ## Developer guide
 
