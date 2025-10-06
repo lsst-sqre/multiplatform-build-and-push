@@ -58,8 +58,6 @@ on:
         required: false
       GAR_PUSH_TOKEN:
         required: false
-      GITHUB_TOKEN:
-        required: false
 
 
 # We need actions/write if we want to do a GH App, and we need
