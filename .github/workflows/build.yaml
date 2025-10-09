@@ -144,7 +144,7 @@ jobs:
       - name: setup_buildx
         uses: docker/setup-buildx-action@v3
         with:
-          name: sciplat-lab-${{ matrix.platform.arch }}
+          name: builder-${{ matrix.platform.arch }}
           platforms: linux/${{ matrix.platform.arch }}
 
       - name: calculate_cache_params
@@ -170,7 +170,7 @@ jobs:
           push: ${{ inputs.push }}
           target: ${{ inputs.target }}
           build-args: ${{ inputs.build-args }}
-          builder: sciplat-lab-${{ matrix.platform.arch }}
+          builder: builder-${{ matrix.platform.arch }}
           platforms: linux/${{ matrix.platform.arch }}
           tags: ${{ steps.calculate_tags.outputs.tags }}
           cache-from: ${{ steps.calculate_cache_params.outputs.cache_from }}
