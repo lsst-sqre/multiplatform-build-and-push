@@ -52,21 +52,28 @@ To automatically set that, the above example uses the context variable `${{ gith
 
 ### Inputs
 
-- `image` (string, required) the name of the image to build and push
-  The image may be a comma-separated list.
+- `images` (string, required) the name of the image or images to build and push.
+  This string may be a comma-separated list.
   Each image includes the registry (e.g. `ghcr.io`) but not the tag.
   For example, you might have `ghcr.io/lsst-sqre/nublado-jupyterlab-base,docker.io/lsstsqre/jupyterlab-base`.
 
-- `tag` (string, optional) the tag to add to the image. If unspecified, a tag will be calculated from the git branch of tag.
+- `tag` (string, optional) the tag to add to the image.
+  If unspecified, a tag will be calculated from the git branch or tag.
 
-- `dockerfile` (string, optional) the path to the Dockerfile to build. Default is `Dockerfile`.
+- `dockerfile` (string, optional) the path to the Dockerfile to build.
+  Default is `Dockerfile`.
 
-- `context` (string, optional) the [Docker build context](https://docs.docker.com/build/building/context/). Default is `.`.
+- `context` (string, optional) the [Docker build context](https://docs.docker.com/build/building/context/).
+  Default is `.`.
 
-- `cache` (boolean, optional) a flag to enable GitHub Actions caching. Default is `true`. If the image being built is very large, `false` might be preferable.
+- `cache` (boolean, optional) a flag to enable GitHub Actions caching.
+  Default is `true`.
+  If the image being built is very large, `false` might be preferable, as the total cache size is 10GB as of October 2025.
 
-- `push` (boolean, optional) a flag to enable pushing to artifact registries (based on the `image` input) . Default is `true`.
-  If `false`, the action skips the image push, but still builds the image with [`docker build`](https://docs.docker.com/engine/reference/commandline/build/) and still does the manifest reassembly across platforms.
+- `push` (boolean, optional) a flag to enable pushing to artifact registries (based on the `image` input) .
+  Default is `true`.
+  If `false`, the action skips the image push, but still builds the image with [`docker build`](https://docs.docker.com/engine/reference/commandline/build/).
+  In that case the action does not perform the manifest reassembly across platforms.
 
 - `target` (string, optional) the name of a build stage in the Dockerfile to target for the image. This allows multiple images built from a single Dockerfile, e.g., "runtime-A" and "runtime-B".
 
