@@ -58,7 +58,9 @@ on:
         required: false
       GAR_PUSH_TOKEN:
         required: false
-
+      IMAGE_SECRETS:
+        description: "Build-time secrets to pass to docker build, in KEY=VALUE format, one per line."
+        required: false
 
 # We need actions/write if we want to do a GH App, and we need
 # packages/write to push to ghcr.io with GITHUB_TOKEN
@@ -170,6 +172,7 @@ jobs:
           push: ${{ inputs.push }}
           target: ${{ inputs.target }}
           build-args: ${{ inputs.build-args }}
+          secrets: ${{ secrets.IMAGE_SECRETS }}
           builder: builder-${{ matrix.platform.arch }}
           platforms: linux/${{ matrix.platform.arch }}
           tags: ${{ steps.calculate_tags.outputs.tags }}
