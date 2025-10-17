@@ -76,7 +76,7 @@ jobs:
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
     steps:
-      - name: checkout_setup
+      - name: Checkout source
         uses: actions/checkout@v5
         with:
           path: 'action-shell'
@@ -95,7 +95,7 @@ jobs:
           fi
           echo "tag=${tag}" >> ${GITHUB_OUTPUT}
 
-  build_containers:
+  containers:
     needs: setup
     runs-on: ${{ matrix.platform.runs_on }}
     timeout-minutes: 60
@@ -113,16 +113,16 @@ jobs:
           - arch: "arm64"
             runs_on: "ubuntu-24.04-arm"
     steps:
-      - name: checkout
+      - name: Checkout source
         uses: actions/checkout@v5
 
-      - name: checkout_functions
+      - name: Checkout scripts
         uses: actions/checkout@v5
         with:
           path: 'action-shell'
           repository: lsst-sqre/multiplatform-build-and-push
 
-      - name: login
+      - name: Login
         uses: lsst-sqre/multi-repository-login@v1
         with:
           images: ${{ env.images }}
@@ -133,7 +133,7 @@ jobs:
           GHCR_PUSH_TOKEN: ${{ secrets.GHCR_PUSH_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: calculate_tags
+      - name: Calculate tags
         id: calculate_tags
         shell: bash
         run: |
@@ -141,13 +141,13 @@ jobs:
           tags=$( calculate_tags )
           echo "tags=${tags}" >> ${GITHUB_OUTPUT}
 
-      - name: setup_buildx
+      - name: Setup buildx
         uses: docker/setup-buildx-action@v3
         with:
           name: builder-${{ matrix.platform.arch }}
           platforms: linux/${{ matrix.platform.arch }}
 
-      - name: calculate_cache_params
+      - name: Calculate cache parameters
         id: calculate_cache_params
         shell: bash
         env:
@@ -162,7 +162,7 @@ jobs:
           echo "cache_from=${cache_from}" >> ${GITHUB_OUTPUT} ;
           echo "cache_to=${cache_to}" >> ${GITHUB_OUTPUT}
 
-      - name: build_platform_container
+      - name: Build container
         uses: docker/build-push-action@v6
         with:
           context: ${{ inputs.context }}
@@ -176,8 +176,8 @@ jobs:
           cache-from: ${{ steps.calculate_cache_params.outputs.cache_from }}
           cache-to: ${{ steps.calculate_cache_params.outputs.cache_to }}
 
-  unify_manifest:
-    needs: [setup, build_containers]
+  manifest:
+    needs: [setup, containers]
     runs-on: ubuntu-latest
     env:
       tag: ${{ needs.setup.outputs.tag }}
@@ -187,15 +187,14 @@ jobs:
 
     timeout-minutes: 30
     steps:
-      - name: checkout_unify_manifest
+      - name: Checkout scripts
         uses: actions/checkout@v5
         with:
           path: 'action-shell'
           repository: lsst-sqre/multiplatform-build-and-push
 
-      - name: login
+      - name: Login
         uses: lsst-sqre/multi-repository-login@v1
-        # Needs v1 when there is one
         with:
           images: ${{ env.images }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -203,7 +202,7 @@ jobs:
           GAR_PUSH_TOKEN: ${{ secrets.GAR_PUSH_TOKEN }}
           GHCR_PUSH_TOKEN: ${{ secrets.GHCR_PUSH_TOKEN }}
 
-      - name: make_total_tagset
+      - name: Calculate tags
         id: make_total_tagset
         shell: bash
         run: |
@@ -215,7 +214,7 @@ jobs:
           echo "in_tags=${in_tags}" >> ${GITHUB_OUTPUT}
           echo "out_tags=${out_tags}" >> ${GITHUB_OUTPUT}
 
-      - name: make_manifest
+      - name: Build multi-platform manifest
         uses: Noelware/docker-manifest-action@v1
         with:
           inputs: ${{ steps.make_total_tagset.outputs.in_tags }}
