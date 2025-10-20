@@ -48,6 +48,48 @@ jobs:
 By default, ghcr.io packages are named after the GitHub repository.
 To automatically set that, the above example uses the context variable `${{ github.repository }}` as the image name.
 
+### Using build-time secrets
+
+If your Docker build requires secrets at build time (e.g., for private npm packages, Sentry authentication, or API tokens), you can pass them using the `IMAGE_SECRETS` secret parameter. These secrets are made available to the Docker build process using Docker BuildKit's [secret mounts](https://docs.docker.com/build/building/secrets/).
+
+#### Example usage
+
+```yaml
+jobs:
+  build:
+    uses: lsst-sqre/multiplatform-build-and-push/.github/workflows/build.yaml@v1
+    with:
+      images: ghcr.io/${{ github.repository }}
+    secrets:
+      IMAGE_SECRETS: |
+        SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+        NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+```
+
+Note that the `IMAGE_SECRETS` secret is defined in the `secrets` section of the job, not in the `with` section.
+Using `IMAGE_SECRETS` is not compatible with using `secrets: inherit` in the job.
+
+#### Format
+
+The `IMAGE_SECRETS` value should be a multiline string with one secret per line in `KEY=VALUE` format:
+
+```
+SECRET_NAME=${{ secrets.SECRET_NAME }}
+ANOTHER_SECRET=${{ secrets.ANOTHER_SECRET }}
+```
+
+#### Accessing secrets in your Dockerfile
+
+In your Dockerfile, mount and use these secrets with the `--mount=type=secret` syntax:
+
+```dockerfile
+RUN --mount=type=secret,id=NPM_TOKEN \
+    echo "//registry.npmjs.org/:_authToken=$(cat /run/secrets/NPM_TOKEN)" > ~/.npmrc && \
+    npm install
+```
+
+**Note**: Build-time secrets are not stored in the final image layers, making them safe for private credentials.
+
 ## Action reference
 
 ### Inputs
