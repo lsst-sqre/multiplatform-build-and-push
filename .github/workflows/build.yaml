@@ -44,6 +44,11 @@ on:
         description: "Name of target stage to build."
         required: false
         type: string
+      fetch-depth:
+        description: "Fetch-depth for checkout."
+        required: false
+        type: number
+        default: 1
       use-nonstandard-ghcr-token:
         description: "Accomodation for sciplat-lab: if set, use GHCR_PUSH_TOKEN rather than GITHUB_TOKEN"
         required: false
@@ -83,6 +88,7 @@ jobs:
         with:
           path: 'action-shell'
           repository: lsst-sqre/multiplatform-build-and-push
+          fetch-depth: ${{ inputs.fetch-depth }}
 
       - name: Define the tag
         id: tag
