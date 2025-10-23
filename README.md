@@ -119,6 +119,8 @@ RUN --mount=type=secret,id=NPM_TOKEN \
 
 - `target` (string, optional) the name of a build stage in the Dockerfile to target for the image. This allows multiple images built from a single Dockerfile, e.g., "runtime-A" and "runtime-B".
 
+- `fetch-depth` (number, optional) the git checkout fetch-depth. Set to 0 for complete history, which some builds require.
+
 - `build-args` (list, optional) A list of build arguments as newline-delimited `arg=value` string pairs. These may be specified in the Dockerfile as `ARG` statements.
 
 - `additional-tags` (list, optional) A comma-delimited list of additional tags to be added to the built image. These must be string literals.
