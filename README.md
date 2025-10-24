@@ -125,10 +125,6 @@ RUN --mount=type=secret,id=NPM_TOKEN \
 
 - `additional-tags` (list, optional) A comma-delimited list of additional tags to be added to the built image. These must be string literals.
 
-- `use-nonstandard-ghcr-token` (boolean, optional, defaults to `false`) for reasons unknown, `GITHUB_TOKEN` has proven insufficient to push sciplat-lab images.
-  This allows the user to specify instead that `GHCR_PUSH_TOKEN` may be substituted.
-  This parameter should not generally be required.
-
 ## Developer guide
 
 This repository provides a GitHub Action reusable workflow.
