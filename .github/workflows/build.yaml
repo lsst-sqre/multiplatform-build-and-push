@@ -116,6 +116,8 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v5
+        with:
+          fetch-depth: ${{ inputs.fetch-depth }}
 
       - name: Checkout scripts
         uses: actions/checkout@v5
@@ -124,7 +126,7 @@ jobs:
           repository: lsst-sqre/multiplatform-build-and-push
 
       - name: Login
-        uses: lsst-sqre/multi-repository-login@u/ajt/v2
+        uses: lsst-sqre/multi-repository-login@v2
         with:
           images: ${{ env.images }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -193,7 +195,7 @@ jobs:
           repository: lsst-sqre/multiplatform-build-and-push
 
       - name: Login
-        uses: lsst-sqre/multi-repository-login@u/ajt/v2
+        uses: lsst-sqre/multi-repository-login@v2
         with:
           images: ${{ env.images }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
