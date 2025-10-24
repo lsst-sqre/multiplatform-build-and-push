@@ -59,6 +59,8 @@ on:
         required: false
       DOCKER_TOKEN:
         required: false
+      GITHUB_TOKEN:
+        required: false
       GHCR_PUSH_TOKEN:
         required: false
       GAR_PUSH_TOKEN:
@@ -134,7 +136,7 @@ jobs:
         uses: lsst-sqre/multi-repository-login@v1
         with:
           images: ${{ env.images }}
-          use_nonstandard_ghcr_token: ${{ inputs.use-nonstandard-ghcr-token }}
+          use-nonstandard-ghcr-token: ${{ inputs.use-nonstandard-ghcr-token }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
           GAR_PUSH_TOKEN: ${{ secrets.GAR_PUSH_TOKEN }}
@@ -206,10 +208,12 @@ jobs:
         uses: lsst-sqre/multi-repository-login@v1
         with:
           images: ${{ env.images }}
+          use-nonstandard-ghcr-token: ${{ inputs.use-nonstandard-ghcr-token }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
           GAR_PUSH_TOKEN: ${{ secrets.GAR_PUSH_TOKEN }}
           GHCR_PUSH_TOKEN: ${{ secrets.GHCR_PUSH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Calculate tags
         id: make_total_tagset
