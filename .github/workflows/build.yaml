@@ -59,8 +59,6 @@ on:
         required: false
       DOCKER_TOKEN:
         required: false
-      GITHUB_TOKEN:
-        required: false
       GHCR_PUSH_TOKEN:
         required: false
       GAR_PUSH_TOKEN:
