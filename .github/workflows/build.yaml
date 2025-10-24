@@ -139,7 +139,6 @@ jobs:
           DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
           GAR_PUSH_TOKEN: ${{ secrets.GAR_PUSH_TOKEN }}
           GHCR_PUSH_TOKEN: ${{ secrets.GHCR_PUSH_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Calculate tags
         id: calculate_tags
@@ -211,7 +210,6 @@ jobs:
           DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
           GAR_PUSH_TOKEN: ${{ secrets.GAR_PUSH_TOKEN }}
           GHCR_PUSH_TOKEN: ${{ secrets.GHCR_PUSH_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Calculate tags
         id: make_total_tagset
