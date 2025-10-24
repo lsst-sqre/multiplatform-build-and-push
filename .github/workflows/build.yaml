@@ -124,7 +124,7 @@ jobs:
           repository: lsst-sqre/multiplatform-build-and-push
 
       - name: Login
-        uses: lsst-sqre/multi-repository-login@v1
+        uses: lsst-sqre/multi-repository-login@u/ajt/v2
         with:
           images: ${{ env.images }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -193,7 +193,7 @@ jobs:
           repository: lsst-sqre/multiplatform-build-and-push
 
       - name: Login
-        uses: lsst-sqre/multi-repository-login@v1
+        uses: lsst-sqre/multi-repository-login@u/ajt/v2
         with:
           images: ${{ env.images }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
