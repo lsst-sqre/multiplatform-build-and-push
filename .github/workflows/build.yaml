@@ -24,7 +24,7 @@ on:
       cache:
         description: "Whether to use GitHub cache for images.  If they are very large, you might not want to."
         required: false
-        default: true
+        default: false
         type: boolean
       push:
         description: "Whether to push the images."

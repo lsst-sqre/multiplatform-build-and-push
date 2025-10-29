@@ -109,7 +109,10 @@ RUN --mount=type=secret,id=NPM_TOKEN \
   Default is `.`.
 
 - `cache` (boolean, optional) a flag to enable GitHub Actions caching.
-  Default is `true`.
+  Default is `false`.
+  If `true`, the action uses the built-in GitHub Actions cache to to store Docker build layers between runs.
+  However, this cache appears to have a race condition when used across multiple architectures so that only one architecture is effectively cached.
+  Disabling caching altogether at least avoids the time cost of uploading and downloading the cache.
   If the image being built is very large, `false` might be preferable, as the total cache size is 10GB as of October 2025.
 
 - `push` (boolean, optional) a flag to enable pushing to artifact registries (based on the `image` input) .
