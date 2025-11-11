@@ -128,6 +128,10 @@ RUN --mount=type=secret,id=NPM_TOKEN \
 
 - `additional-tags` (list, optional) A comma-delimited list of additional tags to be added to the built image. These must be string literals.
 
+### Outputs
+
+- `tag` (string) The tag that was used for the built image. This is either the user-specified tag input or the calculated tag based on the git branch or tag. This does not include the `additional-tags`.
+
 ## Developer guide
 
 This repository provides a GitHub Action reusable workflow.

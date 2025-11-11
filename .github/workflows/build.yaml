@@ -49,6 +49,10 @@ on:
         required: false
         type: number
         default: 1
+    outputs:
+      tag:
+        description: "The tag that was used for the built image"
+        value: ${{ jobs.setup.outputs.tag }}
     secrets:
       DOCKER_USERNAME:
         required: false
