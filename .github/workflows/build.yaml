@@ -22,7 +22,7 @@ on:
         default: "."
         type: string
       cache:
-        description: "Whether to use GitHub cache for images.  If they are very large, you might not want to."
+        description: "Whether to use GitHub cache for images.  Since the caches are not keyed by platform, they do not work well anyway (hence the default)."
         required: false
         default: false
         type: boolean
@@ -85,15 +85,6 @@ jobs:
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
     steps:
-      - name: Free space
-        if: ${{ inputs.free-space }}
-        uses: easimon/maximize-build-space@v10
-        with:
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
-
       - name: Checkout source
         uses: actions/checkout@v5
         with:
@@ -132,6 +123,24 @@ jobs:
           - arch: "arm64"
             runs_on: "ubuntu-24.04-arm"
     steps:
+      - name: Free space
+        if: ${{ inputs.free-space }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Free disk space (start)"
+          df -ah
+          echo "Removing .NET"
+          sudo rm -rf /usr/share/dotnet
+          echo "Removing Android SDK"
+          sudo rm -rf /usr/local/lib/android
+          echo "Removing Haskell"
+          sudo rm -rf /opt/ghc
+          echo "Removing CodeQL"
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          echo "Free disk space (end)"
+          df -ah
+
       - name: Checkout source
         uses: actions/checkout@v5
         with:
