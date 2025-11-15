@@ -113,12 +113,16 @@ RUN --mount=type=secret,id=NPM_TOKEN \
   If `true`, the action uses the built-in GitHub Actions cache to to store Docker build layers between runs.
   However, this cache appears to have a race condition when used across multiple architectures so that only one architecture is effectively cached.
   Disabling caching altogether at least avoids the time cost of uploading and downloading the cache.
-  If the image being built is very large, `false` might be preferable, as the total cache size is 10GB as of October 2025.
 
 - `push` (boolean, optional) a flag to enable pushing to artifact registries (based on the `image` input) .
   Default is `true`.
   If `false`, the action skips the image push, but still builds the image with [`docker build`](https://docs.docker.com/engine/reference/commandline/build/).
   In that case the action does not perform the manifest reassembly across platforms.
+
+- `free-space` (boolean, optional) a flag to remove the .NET, Android SDK, Haskell, and CodeQL directories.
+  If your builds are running out of space, try this.
+  Default is `false`.
+  This saves 18GB on amd64 (only 3GB on arm64).
 
 - `target` (string, optional) the name of a build stage in the Dockerfile to target for the image. This allows multiple images built from a single Dockerfile, e.g., "runtime-A" and "runtime-B".
 
