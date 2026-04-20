@@ -136,8 +136,6 @@ jobs:
           sudo rm -rf /usr/local/lib/android
           echo "Removing Haskell"
           sudo rm -rf /opt/ghc
-          echo "Removing CodeQL"
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
           echo "Free disk space (end)"
           df -ah
 
