@@ -136,8 +136,6 @@ jobs:
           sudo rm -rf /usr/local/lib/android
           echo "Removing Haskell"
           sudo rm -rf /opt/ghc
-          echo "Removing CodeQL"
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
           echo "Free disk space (end)"
           df -ah
 
@@ -234,10 +232,11 @@ jobs:
         shell: bash
         run: |
           . ${GITHUB_WORKSPACE}/action-shell/functions.sh
-          t1=$( platform=amd64 calculate_tags )
-          t2=$( platform=arm64 calculate_tags )
-          in_tags="${t1},${t2}"
-          out_tags=$(echo ${t1} | sed -e 's/-amd64,/,/g' -e 's/-amd64$//g' )
+          amdt=$( platform=amd64 calculate_tags )
+          armt=$( platform=arm64 calculate_tags )
+          multit=$( platform=multi calculate_tags )
+          in_tags="${amdt},${armt}"
+          out_tags=${multit}
           echo "in_tags=${in_tags}" >> ${GITHUB_OUTPUT}
           echo "out_tags=${out_tags}" >> ${GITHUB_OUTPUT}
 
