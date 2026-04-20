@@ -119,10 +119,10 @@ RUN --mount=type=secret,id=NPM_TOKEN \
   If `false`, the action skips the image push, but still builds the image with [`docker build`](https://docs.docker.com/engine/reference/commandline/build/).
   In that case the action does not perform the manifest reassembly across platforms.
 
-- `free-space` (boolean, optional) a flag to remove the .NET, Android SDK, Haskell, and CodeQL directories.
+- `free-space` (boolean, optional) a flag to remove the .NET, Android SDK, and Haskell directories.
   If your builds are running out of space, try this.
   Default is `false`.
-  This saves 18GB on amd64 (only 3GB on arm64).
+  This saves about 18GB on amd64 (only about 3GB on arm64).
 
 - `target` (string, optional) the name of a build stage in the Dockerfile to target for the image. This allows multiple images built from a single Dockerfile, e.g., "runtime-A" and "runtime-B".
 
