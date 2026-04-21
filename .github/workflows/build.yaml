@@ -188,7 +188,7 @@ jobs:
           echo "cache_to=${cache_to}" >> ${GITHUB_OUTPUT}
 
       - name: Build container
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ inputs.context }}
           file: ${{ inputs.dockerfile }}
