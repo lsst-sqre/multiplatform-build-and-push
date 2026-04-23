@@ -167,7 +167,7 @@ jobs:
           echo "tags=${tags}" >> ${GITHUB_OUTPUT}
 
       - name: Setup buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         with:
           name: builder-${{ matrix.platform.arch }}
           platforms: linux/${{ matrix.platform.arch }}
